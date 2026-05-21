@@ -1,0 +1,44 @@
+{
+  "General": {
+    "kit_type": 2
+  },
+  "Monitor": {
+    "screen_orientation": 0
+  },
+  "LED": {
+    "mode": 0,
+    "red_value": 0,
+    "green_value": 0,
+    "blue_value": 255,
+    "brightness": 255
+  },
+  "Fan": {
+    "mode": 2,
+    "manual_mode_duty": 255,
+    "temp_mode_config": {
+      "fan_temp_threshold_low": 45,
+      "fan_temp_threshold_high": 80,
+      "fan_temp_threshold_hyst": 3,
+      "fan_temp_mode_duty_low": 50,
+      "fan_temp_mode_duty_high": 200
+    }
+  },
+  "OLED": {
+    "screen1": {
+      "data_format": 0,
+      "time_format": 0,
+      "display_time": 3.0,
+      "is_run_on_oled": true
+    },
+    "screen2": {
+      "interchange": 0,
+      "display_time": 3.0,
+      "is_run_on_oled": true
+    },
+    "screen3": {
+      "interchange": 0,
+      "display_time": 3.0,
+      "is_run_on_oled": true
+    }
+  }
+}

@@ -1,33 +1,82 @@
-# Freenove Tutorial Online
+# Freenove_Tower_Cooler_for_Raspberry_Pi
 
-<img src="extra\freenove-logo.png" alt="freenove-logo" width='100%' align="left"/>
+> A tower cooler kit suitable for Raspberry Pi 5.
 
+## Introduction
+* FNK0113A
+Single-fan without 0.96inch OLED
+<img src='Picture/FNK0113A.MAIN.jpg' width='70%'/>
 
+* FNK0113B
+Dual-fan with 0.96inch OLED
+<img src='Picture/FNK0113B.MAIN.jpg' width='70%'/>
 
-## <img src="extra\start.png" alt="start" width='5%' align="left"/> **Quick Start**
+## Download
 
-Online Tutorial URL：[tutorial](https://docs.freenove.com/en/latest/)
+* **Use command in console**
 
+	Run following command to download all the files in this repository.
 
+	git clone https://github.com/Freenove/Freenove_Tower_Cooler_for_Raspberry_Pi.git
 
-## <img src="extra\text.png" alt="text" width='5%' align="left"/> **Materials Download**
+* **Manually download in browser**
 
-Tutorial Materials Download URL：[download](https://docs.freenove.com/en/latest/about-freenove/tutorial.html)
+	Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
+	Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
 
+> If you meet any difficulties, please contact our support team for help.
 
+### Support
 
-## <img src="extra\support.png" alt="support" width='4%' align="left"/>  **Support**
+Freenove provides free and quick customer support. Including but not limited to:
 
-We are fully responsible for our products!
+* Quality problems of products
+* Using Problems of products
+* Questions of learning and creation
+* Opinions and suggestions
+* Ideas and thoughts
 
-Please feel free to send us an email if you have any concerns, whether they are questions before buying or problems in use.
+Please send an email to:
 
 [support@freenove.com](mailto:support@freenove.com)
 
-In general, we will reply to you within one working day.
+We will reply to you within one working day.
+
+### Purchase
+
+Please visit the following page to purchase our products:
+
+http://store.freenove.com
+
+Business customers please contact us through the following email address:
+
+[sale@freenove.com](mailto:sale@freenove.com)
+
+### Copyright
+
+All the files in this repository are released under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+![markdown](https://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png)
+
+This means you can use them on your own derived works, in part or completely. But NOT for the purpose of commercial use.
+You can find a copy of the license in this repository.
+
+Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd. Can't be used without formal permission.
 
 
+### About
 
-## <img src="extra\freenove.png" alt="freenove" width='5%' align="left"/>**Freenove Official Website**
+Freenove is an open-source electronics platform.
 
-Freenove Official Website URL: [Freenove](https://freenove.com/)
+Freenove is committed to helping customer quickly realize the creative idea and product prototypes, making it easy to get started for enthusiasts of programing and electronics and launching innovative open source products.
+
+Our services include:
+
+* Robot kits
+* Learning kits for Arduino, Raspberry Pi and micro:bit
+* Electronic components and modules, tools
+* Product customization service
+
+Our code and circuit are open source. You can obtain the details and the latest information through visiting the following web site:
+
+http://www.freenove.com

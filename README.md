@@ -11,18 +11,31 @@ Single-fan without 0.96inch OLED
 Dual-fan with 0.96inch OLED
 <img src='Picture/FNK0113B.MAIN.jpg' width='70%'/>
 
-## Download
+## Setup (Raspberry Pi 5)
 
-* **Use command in console**
+This repo is self-contained for the tower cooler. LED native sources live
+under `native/ws2812/` (vendored from Freenove utils); runtime still uses
+the APT `libpio` package.
 
-	Run following command to download all the files in this repository.
+From the repo root:
 
-	git clone https://github.com/Freenove/Freenove_Tower_Cooler_for_Raspberry_Pi.git
+```bash
+python3 setup.py
+```
 
-* **Manually download in browser**
+That installs this product under `/opt/freenove/tower-cooler` (other
+Freenove kits can use sibling directories under `/opt/freenove/`):
 
-	Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
-	Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
+```text
+/opt/freenove/tower-cooler/
+├── lib/libfreenove_ws2812_lib.so
+└── app/                             # UI, tasks, assets
+```
+
+Desktop launchers are created under `~/Desktop` and
+`~/.local/share/applications`, pointing at the `/opt` install.
+Official APT packages (build tools, `libpio-dev`, `python3-luma.oled`, …)
+stay in their normal system locations.
 
 > If you meet any difficulties, please contact our support team for help.
 

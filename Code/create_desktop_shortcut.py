@@ -3,6 +3,8 @@ import sys
 
 class DesktopShortcutCreator:
     # name must match the filename under picture/xpm/
+    # Paths are derived from this file's location so shortcuts follow the
+    # installed tree when setup copies Code/ to /opt/freenove/tower-cooler/app.
     def __init__(self, name="FNK0108", comment="Freenove Computer Case Kit Mini for Raspberry Pi"):
         self.name = name
         self.comment = comment
@@ -87,7 +89,7 @@ Name={self.name}
 Comment={self.comment}
 Exec=bash {run_script_path}
 Icon={icon_path}
-Terminal=true
+Terminal=false
 Categories=Application;Development;
 """
     
@@ -119,7 +121,7 @@ Categories=Application;Development;
                 print(f"Warning: Failed to remove __pycache__ folder: {e}")
     
     def create_shortcut_to_desktop(self, target_filename=None):
-        """Create a desktop link shortcut (Type=Link) directly on the desktop"""
+        """Create a Type=Application shortcut directly on the desktop"""
         try:
             # Get desktop path
             desktop_dir = self._get_desktop_path()
@@ -136,31 +138,20 @@ Categories=Application;Development;
             # Validate required files
             run_script_path, icon_path = self._validate_files()
 
-            # Get original user's home directory for the URL
-            original_user_home = self._get_original_user_home()
-            apps_dir = os.path.join(original_user_home, ".local/share/applications")
-            url_path = os.path.join(apps_dir, f"{target_name}.desktop")
-
-            # Create desktop file content with Type=Link
-            application_content = f"""[Desktop Entry]
-Version=1.0
-Type=Link
-Name={self.name}
-Comment={self.comment}
-Icon={icon_path}
-URL={url_path}
-"""
+            # Same Application entry as the menu shortcut (Link entries often
+            # do nothing useful when "executed" from the file manager).
+            application_content = self._create_application_content(run_script_path, icon_path)
 
             # Destination path on desktop
-            destination_path = os.path.join(desktop_dir, f"{target_name}.desktop")
+            destination_path = os.path.join(desktop_dir, f'{target_name}.desktop')
 
             # Write desktop file directly to desktop
             try:
                 with open(destination_path, 'w', encoding='utf-8') as f:
                     f.write(application_content)
-                print(f"Created desktop link file directly on desktop: {destination_path}")
+                print(f'Created desktop application file: {destination_path}')
             except Exception as e:
-                raise Exception(f"Error creating desktop file: {e}")
+                raise Exception(f'Error creating desktop file: {e}')
 
             # Make the file executable
             self._make_executable(destination_path)

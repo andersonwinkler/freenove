@@ -1,42 +1,55 @@
 # api_service.py
 import os
+import pwd
 import sys
 import shutil
 import subprocess
 
 class ServiceGenerator:
-    def __init__(self, filename="task_manager.py", service_name="my_app_running.service"):
+    def __init__(self, filename='task_manager.py', service_name='my_app_running.service'):
         self.filename = filename
         self.service_name = service_name
         self.current_directory = None
         self.current_username = None
         self.get_current_directory()
-        self.get_current_username_from_directory(self.current_directory)
-        
+        self.resolve_username()
+
     def check_target_py(self):
         """Check if target Python file exists"""
         if not os.path.exists(self.filename):
-            print(f"Error: {self.filename} does not exist in the current directory.")
+            print(f'Error: {self.filename} does not exist in the current directory.')
             sys.exit(1)
-            
+
     def get_current_directory(self):
-        """Get current directory path"""
+        """Get current directory path (install tree under /opt, or a checkout)."""
         self.current_directory = os.getcwd()
         return self.current_directory
-        
-    def get_current_username_from_directory(self, directory):
-        """Extract username from directory path"""
+
+    def resolve_username(self):
+        """Resolve the real user for systemd User= (works under /opt, not only /home)."""
+        sudo_user = os.environ.get('SUDO_USER')
+        if sudo_user and sudo_user != 'root':
+            self.current_username = sudo_user
+            return self.current_username
+
+        parts = self.current_directory.split('/')
+        if len(parts) > 2 and parts[1] == 'home' and parts[2]:
+            self.current_username = parts[2]
+            return self.current_username
+
         try:
-            parts = directory.split('/')
-            if len(parts) > 2 and parts[1] == 'home':
-                self.current_username = parts[2]
-                return self.current_username
-            else:
-                print("Error: Unable to extract username from directory path.")
-                sys.exit(1)
-        except Exception as e:
-            print(f"Error extracting username from directory path: {e}")
-            sys.exit(1)
+            self.current_username = pwd.getpwuid(os.getuid()).pw_name
+        except KeyError:
+            self.current_username = os.environ.get('USER') or 'pi'
+        if self.current_username == 'root':
+            # GUI is often launched via sudo; prefer a non-root account if possible
+            self.current_username = os.environ.get('USER') or 'pi'
+        return self.current_username
+
+    def get_current_username_from_directory(self, directory):
+        """Back-compat wrapper; username no longer depends on /home/... paths."""
+        self.current_directory = directory or self.current_directory
+        return self.resolve_username()
             
     def create_my_service(self):
         if "led" in self.service_name.lower():

@@ -4,9 +4,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 cd "$SCRIPT_DIR"
 
-if [ ! -f "app_ui.py" ]; then
-    echo "Error: app_ui.py is missing."
+if [ ! -f 'app_ui.py' ]; then
+    echo 'Error: app_ui.py is missing.'
     exit 1
 fi
 
-sudo python app_ui.py
+sudo python3 app_ui.py

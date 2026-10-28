@@ -2,7 +2,7 @@ import ctypes
 import os
 import time
 
-lib_path = '/usr/local/lib/libfreenove_ws2812_lib.so'
+lib_path = '/opt/freenove/tower-cooler/lib/libfreenove_ws2812_lib.so'
 if not os.path.exists(lib_path):
     raise FileNotFoundError(f"Library not found at {lib_path}")
 

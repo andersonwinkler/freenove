@@ -1,0 +1,13 @@
+Vendored from Freenove utils (piolib/examples), kept in-tree so setup
+does not clone any external repository.
+
+Required files for the tower-cooler LED driver:
+  freenove_ws2812.c
+  freenove_ws2812.h
+  ws2812.pio.h
+
+Build links against the Raspberry Pi OS APT package libpio / libpio-dev
+(headers under /usr/include/piolib). The rest of the utils tree
+(dtmerge, freenove_pwm, python demos, etc.) is not needed for this kit.
+
+Install destination (via setup.py / cmake): /opt/freenove/tower-cooler/lib/

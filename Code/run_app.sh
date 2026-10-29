@@ -9,4 +9,18 @@ if [ ! -f 'app_ui.py' ]; then
     exit 1
 fi
 
-sudo python3 app_ui.py
+# Preserve the caller's X11 display + auth cookie for sudo.
+# Without this, root cannot connect to a user VNC/X session (e.g. TurboVNC :1)
+# and Qt fails with: "No protocol specified" / "could not connect to display".
+if [ -z "${DISPLAY:-}" ]; then
+    echo 'Error: DISPLAY is not set. Run this from a graphical session (e.g. VNC).'
+    exit 1
+fi
+
+XAUTH="${XAUTHORITY:-$HOME/.Xauthority}"
+if [ ! -r "$XAUTH" ]; then
+    echo "Error: X authority file not readable: $XAUTH"
+    exit 1
+fi
+
+sudo env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" python3 app_ui.py

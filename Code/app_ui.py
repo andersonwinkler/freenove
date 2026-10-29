@@ -3,7 +3,7 @@
 import os
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QTabWidget
 from PyQt5.QtCore import Qt, QTimer
 
 from app_ui_monitor import MonitoringTab             # Import monitoring interface
@@ -14,6 +14,13 @@ from app_ui_oled import OledTab                      # Import OLED interface
 from api_json import ConfigManager                   # Import configuration management module
 from api_systemInfo import SystemInformation         # Import system information module
 from api_service import ServiceGenerator             # Import background task generator module
+
+# Extra vertical room for the window manager title bar when checking fit.
+_WINDOW_DECORATION_HEIGHT = 48
+
+class ScreenTooSmallError(Exception):
+    """Raised when the available screen cannot fit the fixed-size UI."""
+    pass
 
 class MainWindow(QMainWindow):
     def __init__(self, width=800, height=420):
@@ -156,20 +163,50 @@ class MainWindow(QMainWindow):
 
         # Set central widget
         self.setCentralWidget(self.tab_widget)
+    def preferred_screen(self):
+        """Prefer a DSI panel when present (official Freenove touch display); else primary."""
+        app = QApplication.instance()
+        for screen in app.screens():
+            if 'DSI' in screen.name().upper():
+                return screen
+        return app.primaryScreen()
+
+    def center_on_preferred_screen(self):
+        """Place the window in the middle of the usable desktop (excludes panels)."""
+        screen = self.preferred_screen()
+        if screen is None:
+            return
+        avail = screen.availableGeometry()
+        frame = self.frameGeometry()
+        frame.moveCenter(avail.center())
+        self.move(frame.topLeft())
+
     def load_ui_config(self):
         """Load configuration"""
-        self.showMaximized()
-        self.screen_resolution = QApplication.desktop().screenGeometry()
-        width = self.screen_resolution.width()
-        height = self.screen_resolution.height()
+        screen = self.preferred_screen()
+        if screen is None:
+            raise ScreenTooSmallError('No display screen is available.')
 
-        self.showNormal()
+        # availableGeometry() excludes panels/taskbars — better than full screenGeometry
+        # when deciding size and centering (especially under VNC / sudo).
+        avail = screen.availableGeometry()
+        self.screen_resolution = avail
+        width = avail.width()
+        height = avail.height()
+
         if width > height:
             self.ui_main_width = 800
             self.ui_main_height = 420
         else:
             self.ui_main_width = 480
             self.ui_main_height = 740
+
+        needed_h = self.ui_main_height + _WINDOW_DECORATION_HEIGHT
+        if width < self.ui_main_width or height < needed_h:
+            raise ScreenTooSmallError(
+                f'Screen too small to open the UI '
+                f'({width}x{height} available; need at least '
+                f'{self.ui_main_width}x{needed_h}).')
 
         # Load Monitor interface parameters
         self.setFixedSize(self.ui_main_width, self.ui_main_height)
@@ -791,17 +828,15 @@ class MainWindow(QMainWindow):
             config_manager.set_value(section, key, value)
         config_manager.save_config()
         
-if __name__ == "__main__":
+if __name__ == '__main__':
     os.system('sudo chmod 700 /run/user/1000')
     app = QApplication(sys.argv)
-    screens = app.screens()
-    dsi_screen = None
-    for screen in screens:
-        if "DSI" in screen.name().upper():
-            dsi_screen = screen
-            break
-    window = MainWindow()
+    try:
+        window = MainWindow()
+    except ScreenTooSmallError as e:
+        print(e, file=sys.stderr)
+        QMessageBox.critical(None, 'Freenove Tower Cooler', str(e))
+        sys.exit(1)
     window.show()
-    if dsi_screen:
-        window.move(dsi_screen.geometry().topLeft()) 
+    window.center_on_preferred_screen()
     sys.exit(app.exec_())

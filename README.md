@@ -1,33 +1,16 @@
-# Freenove_Tower_Cooler_for_Raspberry_Pi
+Refactored driver for Freenove tower cooler (FNK0113B). This repo is self-contained for the tower cooler.
 
-> A tower cooler kit suitable for Raspberry Pi 5.
-
-## Introduction
-* FNK0113A
-Single-fan without 0.96inch OLED
-<img src='Picture/FNK0113A.MAIN.jpg' width='70%'/>
-
-* FNK0113B
-Dual-fan with 0.96inch OLED
-<img src='Picture/FNK0113B.MAIN.jpg' width='70%'/>
-
-## Setup (Raspberry Pi 5)
-
-This repo is self-contained for the tower cooler. LED native sources live
-under `native/ws2812/` (vendored from Freenove utils); runtime still uses
-the APT `libpio` package.
-
-From the repo root:
+## Setup
 
 ```bash
 python3 setup.py
 ```
 
-That installs this product under `/opt/freenove/tower-cooler` (other
-Freenove kits can use sibling directories under `/opt/freenove/`):
+That installs under `/opt/freenove/tower-cooler`:
 
 ```text
 /opt/freenove/tower-cooler/
+├── uninstall.sh
 ├── lib/libfreenove_ws2812_lib.so
 └── app/                             # UI, tasks, assets
 ```
@@ -37,33 +20,29 @@ Desktop launchers are created under `~/Desktop` and
 Official APT packages (build tools, `libpio-dev`, `python3-luma.oled`, …)
 stay in their normal system locations.
 
-> If you meet any difficulties, please contact our support team for help.
+### Uninstall
 
-### Support
+From the repo or the installed copy:
 
-Freenove provides free and quick customer support. Including but not limited to:
+```bash
+./uninstall.sh
+# or after install:
+/opt/freenove/tower-cooler/uninstall.sh
+```
 
-* Quality problems of products
-* Using Problems of products
-* Questions of learning and creation
-* Opinions and suggestions
-* Ideas and thoughts
+Removes services, desktop shortcuts, and `/opt/freenove/tower-cooler`.
+APT packages and the repo checkout are left alone.
 
-Please send an email to:
+### Power estimate
 
-[support@freenove.com](mailto:support@freenove.com)
+After install, approximate Pi 5 + tower-cooler draw (PMIC rails + LED/fan/OLED
+estimates) with:
 
-We will reply to you within one working day.
-
-### Purchase
-
-Please visit the following page to purchase our products:
-
-http://store.freenove.com
-
-Business customers please contact us through the following email address:
-
-[sale@freenove.com](mailto:sale@freenove.com)
+```bash
+python3 /opt/freenove/tower-cooler/app/tower-cooler-power.py
+# optional: average more PMIC samples
+python3 /opt/freenove/tower-cooler/app/tower-cooler-power.py 10
+```
 
 ### Copyright
 
@@ -74,22 +53,4 @@ All the files in this repository are released under [Creative Commons Attributio
 This means you can use them on your own derived works, in part or completely. But NOT for the purpose of commercial use.
 You can find a copy of the license in this repository.
 
-Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd. Can't be used without formal permission.
-
-
-### About
-
-Freenove is an open-source electronics platform.
-
-Freenove is committed to helping customer quickly realize the creative idea and product prototypes, making it easy to get started for enthusiasts of programing and electronics and launching innovative open source products.
-
-Our services include:
-
-* Robot kits
-* Learning kits for Arduino, Raspberry Pi and micro:bit
-* Electronic components and modules, tools
-* Product customization service
-
-Our code and circuit are open source. You can obtain the details and the latest information through visiting the following web site:
-
-http://www.freenove.com
+Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd. Can't be used without formal permission. For information, see: [http://www.freenove.com].

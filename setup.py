@@ -44,6 +44,43 @@ def ensure_install_root(username):
     run_command(f'sudo mkdir -p {LIB_DIR} {APP_DIR}')
     run_command(f'sudo chown -R {username}:{username} {INSTALL_ROOT}')
 
+def _cmake_cache_value(cache_path, key):
+    """Return the value for KEY from a CMakeCache.txt, or None."""
+    prefix = f'{key}:'
+    try:
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith(prefix):
+                    # Format: KEY:TYPE=value
+                    _, _, value = line.rstrip('\n').partition('=')
+                    return value
+    except OSError:
+        return None
+    return None
+
+def prepare_cmake_build_dir(native_dir, build_dir):
+    """Drop a stale CMake build tree if the source/build paths moved (e.g. repo rename)."""
+    cache_path = os.path.join(build_dir, 'CMakeCache.txt')
+    if not os.path.isfile(cache_path):
+        return
+
+    expected_source = os.path.realpath(native_dir)
+    expected_build = os.path.realpath(build_dir)
+    cached_source = _cmake_cache_value(cache_path, 'CMAKE_HOME_DIRECTORY')
+    cached_build = _cmake_cache_value(cache_path, 'CMAKE_CACHEFILE_DIR')
+
+    stale = False
+    if cached_source and os.path.realpath(cached_source) != expected_source:
+        stale = True
+    if cached_build and os.path.realpath(cached_build) != expected_build:
+        stale = True
+
+    if stale:
+        print(
+            f'Stale CMake cache detected under {build_dir} '
+            f'(was source={cached_source!r}, build={cached_build!r}); removing it.')
+        shutil.rmtree(build_dir)
+
 def install_ws2812_lib(script_dir):
     """Build vendored Freenove WS2812 lib and install under /opt/freenove/tower-cooler/lib."""
     native_dir = os.path.join(script_dir, 'native', 'ws2812')
@@ -51,6 +88,7 @@ def install_ws2812_lib(script_dir):
     if not os.path.isfile(os.path.join(native_dir, 'CMakeLists.txt')):
         raise Exception(f'Missing native WS2812 sources at {native_dir}')
 
+    prepare_cmake_build_dir(native_dir, build_dir)
     run_command(
         'sudo apt install -y build-essential cmake '
         'device-tree-compiler libfdt-dev libgnutls28-dev libpio-dev')
@@ -87,6 +125,16 @@ def install_app(script_dir, username):
     run_command(f'sudo chown -R {username}:{username} {INSTALL_ROOT}')
     run_command(f'chmod 755 {os.path.join(APP_DIR, "run_app.sh")}')
 
+def install_uninstall_script(script_dir, username):
+    """Install uninstall.sh next to app/ and lib/ under the product root."""
+    src = os.path.join(script_dir, 'uninstall.sh')
+    if not os.path.isfile(src):
+        raise Exception(f'Missing uninstall script at {src}')
+    dest = os.path.join(INSTALL_ROOT, 'uninstall.sh')
+    run_command(f'sudo cp -a {src} {dest}')
+    run_command(f'sudo chown {username}:{username} {dest}')
+    run_command(f'chmod 755 {dest}')
+
 def create_shortcuts():
     run_command(f'cd {APP_DIR} && python3 create_desktop_shortcut.py')
 
@@ -111,9 +159,11 @@ def main():
 
         run_command('sudo apt install -y python3-pip python3-luma.oled')
         install_app(script_dir, username)
+        install_uninstall_script(script_dir, username)
         create_shortcuts()
         print(f'Setup complete. App installed at {APP_DIR}')
         print(f'WS2812 library directory: {LIB_DIR}')
+        print(f'Uninstall with: {os.path.join(INSTALL_ROOT, "uninstall.sh")}')
     except Exception as e:
         print(f'Error occurred: {e}')
 

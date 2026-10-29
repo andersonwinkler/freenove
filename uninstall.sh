@@ -65,3 +65,4 @@ remove_install_root
 echo 'Done. APT packages were left installed.'
 echo 'Parent /opt/freenove (for other products) was left in place if present.'
 echo 'Repo checkout (including native/ sources) was not deleted.'
+echo 'If you ran this from /opt/freenove/tower-cooler/uninstall.sh, that copy is gone with the install root.'

@@ -124,6 +124,9 @@ def install_app(script_dir, username):
 
     run_command(f'sudo chown -R {username}:{username} {INSTALL_ROOT}')
     run_command(f'chmod 755 {os.path.join(APP_DIR, "run_app.sh")}')
+    askpass = os.path.join(APP_DIR, 'sudo_askpass.sh')
+    if os.path.isfile(askpass):
+        run_command(f'chmod 755 {askpass}')
 
 def install_uninstall_script(script_dir, username):
     """Install uninstall.sh next to app/ and lib/ under the product root."""

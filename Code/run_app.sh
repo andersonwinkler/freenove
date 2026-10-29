@@ -23,4 +23,14 @@ if [ ! -r "$XAUTH" ]; then
     exit 1
 fi
 
-sudo env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" python3 app_ui.py
+# Desktop/menu clicks have no TTY; use a zenity askpass so sudo can prompt.
+SUDO_FLAGS=()
+if [ ! -t 0 ]; then
+    ASKPASS="$SCRIPT_DIR/sudo_askpass.sh"
+    if [ -x "$ASKPASS" ]; then
+        export SUDO_ASKPASS="$ASKPASS"
+        SUDO_FLAGS+=(-A)
+    fi
+fi
+
+sudo "${SUDO_FLAGS[@]}" env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" python3 app_ui.py

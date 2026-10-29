@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 class DesktopShortcutCreator:
@@ -87,12 +88,50 @@ Version=1.0
 Type=Application
 Name={self.name}
 Comment={self.comment}
-Exec=bash {run_script_path}
+Exec={run_script_path}
+Path={self.current_dir}
 Icon={icon_path}
 Terminal=false
-Categories=Application;Development;
+Categories=Utility;System;
+StartupNotify=true
 """
-    
+
+    def _mark_launcher_trusted(self, desktop_path):
+        """Mark a Desktop icon as an allowed launcher (Raspberry Pi / PCManFM).
+
+        Order matters: set metadata::trusted before chmod +x, as the real user
+        (gio metadata is per-user and fails when run as root).
+        """
+        cmd = ['gio', 'set', desktop_path, 'metadata::trusted', 'true']
+        sudo_user = os.environ.get('SUDO_USER')
+        if hasattr(os, 'geteuid') and os.geteuid() == 0 and sudo_user:
+            cmd = ['sudo', '-u', sudo_user, '-H', '--'] + cmd
+        try:
+            subprocess.run(
+                cmd,
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL)
+        except OSError as e:
+            print(f'Warning: could not mark launcher trusted ({desktop_path}): {e}')
+
+    def _finalize_desktop_icon(self, desktop_path):
+        """Trust then chmod — required so PCManFM launches as an app, not a script."""
+        # Non-executable while setting trust (AskUbuntu/RPi: trust before +x)
+        os.chmod(desktop_path, 0o644)
+        self._mark_launcher_trusted(desktop_path)
+        os.chmod(desktop_path, 0o755)
+
+    def _refresh_application_menu(self, applications_dir):
+        try:
+            subprocess.run(
+                ['update-desktop-database', applications_dir],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL)
+        except OSError:
+            pass
+
     def _make_executable(self, file_path, run_script_path=None):
         """Make file executable, optionally also make the run script executable"""
         try:
@@ -100,6 +139,9 @@ Categories=Application;Development;
             if run_script_path:
                 # Also make the run_app.sh script executable
                 os.chmod(run_script_path, 0o755)
+            askpass = os.path.join(self.current_dir, 'sudo_askpass.sh')
+            if os.path.isfile(askpass):
+                os.chmod(askpass, 0o755)
         except Exception as e:
             raise Exception(f"Error setting file permissions: {e}")
     
@@ -153,8 +195,8 @@ Categories=Application;Development;
             except Exception as e:
                 raise Exception(f'Error creating desktop file: {e}')
 
-            # Make the file executable
-            self._make_executable(destination_path)
+            # Trust before +x so PCManFM treats this as a launcher, not a script
+            self._finalize_desktop_icon(destination_path)
 
             return True
 
@@ -228,9 +270,10 @@ Categories=Application;Development;
             except Exception as e:
                 raise Exception(f"Error creating desktop file: {e}")
             
-            # Make the file executable
+            # Make the file executable and refresh the menu cache
             self._make_executable(dest_path, run_script_path)
-                
+            self._refresh_application_menu(dest_dir)
+
             return True
             
         except FileNotFoundError as e:
